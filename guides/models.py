@@ -10,8 +10,14 @@ class GuideGroup(models.Model):
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    # Make these nullable for migration, then you can change them later
+    email = models.EmailField(blank=True, null=True)
+    phone_number = models.CharField(max_length=17, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    
     def __str__(self):
-        return f"{self.guide_groupname} (Members: {self.guide_group_number})"
+        return f"{self.guide_groupname} (Members: {self.guide_group_number}) - {'Verified' if self.is_verified else 'Pending'}"
     
     class Meta:
         db_table = 'guide_groups'
@@ -25,7 +31,7 @@ class Guide(models.Model):
     
     guide_id = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guide_profile')
-    guide_group = models.ForeignKey(GuideGroup, on_delete=models.CASCADE, related_name='guides', null=True, blank=True)
+    guide_group = models.ForeignKey(GuideGroup, on_delete=models.CASCADE, related_name='guides')
     name = models.CharField(max_length=100)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
@@ -41,7 +47,7 @@ class Guide(models.Model):
     joined_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"Guide: {self.name} - Group: {self.guide_group.guide_groupname if self.guide_group else 'No Group'}"
+        return f"Guide: {self.name} - Group: {self.guide_group.guide_groupname}"
     
     class Meta:
         db_table = 'guides'

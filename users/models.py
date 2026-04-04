@@ -16,6 +16,9 @@ class User(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     email = models.EmailField(unique=True)
+    is_verified = models.BooleanField(default=False)
+    verification_documents = models.FileField(upload_to='verification_docs/', blank=True, null=True)
+    guide_group_id = models.IntegerField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.username} - {self.role}"
