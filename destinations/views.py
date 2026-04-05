@@ -5,7 +5,7 @@ from .serializers import DestinationSerializer, DestinationListSerializer
 
 class DestinationListView(generics.ListAPIView):
     queryset = Destination.objects.all()
-    serializer_class = DestinationListSerializer
+    serializer_class = DestinationListSerializer  # Use list serializer for listing
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['destination_type', 'is_popular']
     search_fields = ['name', 'location', 'description']
@@ -14,7 +14,7 @@ class DestinationListView(generics.ListAPIView):
 
 class DestinationDetailView(generics.RetrieveAPIView):
     queryset = Destination.objects.all()
-    serializer_class = DestinationSerializer
+    serializer_class = DestinationSerializer  # Use full serializer for detail
     permission_classes = (permissions.AllowAny,)
     lookup_field = 'destination_id'
 

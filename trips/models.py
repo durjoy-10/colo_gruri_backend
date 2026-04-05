@@ -28,6 +28,7 @@ class Trip(models.Model):
     class Meta:
         db_table = 'trips'
         verbose_name_plural = 'Trips'
+        ordering = ['-created_at']
 
 class TripDestination(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='destinations')

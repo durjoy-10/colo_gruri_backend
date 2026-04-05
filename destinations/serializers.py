@@ -14,11 +14,22 @@ class DestinationMapSerializer(serializers.ModelSerializer):
 class DestinationSerializer(serializers.ModelSerializer):
     images = DestinationImageSerializer(many=True, read_only=True)
     map_details = DestinationMapSerializer(source='map', read_only=True)
+    primary_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Destination
         fields = '__all__'
         read_only_fields = ('destination_id', 'created_at', 'updated_at', 'average_rating', 'total_reviews')
+    
+    def get_primary_image(self, obj):
+        # Get the primary image or first image
+        primary = obj.images.filter(is_primary=True).first()
+        if primary:
+            return primary.image.url if primary.image else None
+        first_image = obj.images.first()
+        if first_image:
+            return first_image.image.url if first_image.image else None
+        return None
 
 class DestinationListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
@@ -29,10 +40,11 @@ class DestinationListSerializer(serializers.ModelSerializer):
                   'entry_fee', 'average_rating', 'is_popular', 'primary_image')
     
     def get_primary_image(self, obj):
+        # Get the primary image or first image
         primary = obj.images.filter(is_primary=True).first()
         if primary:
-            return primary.image.url
+            return primary.image.url if primary.image else None
         first_image = obj.images.first()
         if first_image:
-            return first_image.image.url
+            return first_image.image.url if first_image.image else None
         return None

@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 
                   'phone_number', 'national_id', 'profile_picture', 'address', 
-                  'is_verified', 'date_joined')
+                  'is_verified', 'date_joined', 'gender', 'date_of_birth', 'preferred_language')
         read_only_fields = ('id', 'date_joined', 'is_verified')
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -17,13 +17,13 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password', 'password2', 'email', 'first_name', 
-                  'last_name', 'role', 'phone_number', 'national_id', 'address')
+                  'last_name', 'role', 'phone_number', 'national_id', 'address',
+                  'gender', 'date_of_birth', 'preferred_language')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         
-        # Validate role
         if attrs.get('role') not in ['traveller', 'guide']:
             raise serializers.ValidationError({"role": "Role must be either 'traveller' or 'guide'"})
         
@@ -33,7 +33,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         user = User.objects.create_user(**validated_data)
         
-        # If user is guide, set is_verified to False initially
         if user.role == 'guide':
             user.is_verified = False
             user.save()
@@ -45,5 +44,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 
                   'phone_number', 'national_id', 'profile_picture', 'address', 
-                  'is_verified', 'date_joined', 'last_login')
+                  'is_verified', 'date_joined', 'last_login', 'gender', 'date_of_birth', 'preferred_language')
         read_only_fields = ('id', 'date_joined', 'last_login', 'is_verified')

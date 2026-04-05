@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db import models  # Add this import for models.Sum()
+from django.db import models
 from .models import Trip, TripDestination, Expense
 from destinations.serializers import DestinationSerializer
 
@@ -23,8 +23,17 @@ class TripSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Trip
-        fields = '__all__'  # Note: Use '__all__' not '_all_'
+        fields = ('trip_id', 'trip_name', 'start_date', 'end_date', 'total_budget', 
+                  'status', 'notes', 'created_at', 'updated_at', 'traveller', 
+                  'destinations', 'expenses', 'total_expenses')
         read_only_fields = ('trip_id', 'created_at', 'updated_at')
+        extra_kwargs = {
+            'traveller': {'required': False}
+        }
     
     def get_total_expenses(self, obj):
         return obj.expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+    
+    def validate(self, data):
+        print(f"Validating data: {data}")
+        return data
