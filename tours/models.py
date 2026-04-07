@@ -22,10 +22,25 @@ class Tour(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='upcoming')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    cover_image = models.ImageField(upload_to='tour_covers/', blank=True, null=True)
+    
+    # New fields for expense tracking
+    total_expenses = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_locked = models.BooleanField(default=False)  # Lock tour when completed
     
     @property
     def final_price(self):
         return self.price_per_person * (1 - self.discount_percentage / 100)
+    
+    @property
+    def total_revenue(self):
+        from .models import TourBooking
+        bookings = TourBooking.objects.filter(tour=self, status='completed')
+        return bookings.aggregate(total=models.Sum('total_amount'))['total'] or 0
+    
+    @property
+    def net_profit(self):
+        return self.total_revenue - self.total_expenses
     
     def __str__(self):
         return f"{self.tour_name} - {self.guide_group.guide_groupname}"
@@ -33,6 +48,24 @@ class Tour(models.Model):
     class Meta:
         db_table = 'tours'
         verbose_name_plural = 'Tours'
+
+
+class TourImage(models.Model):
+    image_id = models.AutoField(primary_key=True)
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='tour_images/')
+    caption = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order']
+        db_table = 'tour_images'
+    
+    def __str__(self):
+        return f"Image for {self.tour.tour_name}"
+
 
 class TourDestination(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='destinations')
@@ -51,6 +84,7 @@ class TourDestination(models.Model):
     
     def __str__(self):
         return f"{self.tour.tour_name} - {self.destination.name} (Day {self.order})"
+
 
 class FoodPlan(models.Model):
     MEAL_TYPE = (
@@ -73,6 +107,7 @@ class FoodPlan(models.Model):
     def __str__(self):
         return f"Day {self.day_number} - {self.meal_type} for {self.tour_destination.tour.tour_name}"
 
+
 class TourBooking(models.Model):
     BOOKING_STATUS = (
         ('pending', 'Pending'),
@@ -90,6 +125,7 @@ class TourBooking(models.Model):
     status = models.CharField(max_length=20, choices=BOOKING_STATUS, default='pending')
     payment_method = models.CharField(max_length=50, blank=True)
     payment_id = models.CharField(max_length=100, blank=True)
+    guide_reference = models.CharField(max_length=100, blank=True)
     special_requests = models.TextField(blank=True)
     
     def __str__(self):

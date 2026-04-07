@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     GuideGroupRegistrationView, GuideGroupListView, GuideGroupDetailView,
-    PendingGuideGroupsView, VerifyGuideGroupView, RejectGuideGroupView
+    PendingGuideGroupsView, VerifyGuideGroupView, RejectGuideGroupView,
+    GuideDashboardView, GuideGroupBookingsView
 )
 
 urlpatterns = [
@@ -11,4 +12,6 @@ urlpatterns = [
     path('pending-groups/', PendingGuideGroupsView.as_view(), name='pending-groups'),
     path('verify-group/<int:group_id>/', VerifyGuideGroupView.as_view(), name='verify-group'),
     path('reject-group/<int:group_id>/', RejectGuideGroupView.as_view(), name='reject-group'),
+    path('dashboard/', GuideDashboardView.as_view(), name='guide-dashboard'),
+    path('bookings/', GuideGroupBookingsView.as_view(), name='guide-bookings'),
 ]
